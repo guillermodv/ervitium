@@ -6,16 +6,28 @@ class Block {
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash();
+    this.seed = 0;
   }
 
   calculateHash() {
-    return SHA256(this.timestamp + this.previousHash);
+    return SHA256(
+      this.timestamp + this.previousHash + JSON.stringify(this.data) + this.seed
+    ).toString();
+  }
+
+  findBlock(dificult) {
+    while (this.hash.substring(0, dificult) !== Array(dificult + 1).join("0")) {
+      this.seed++;
+      this.hash = this.calculateHash();
+    }
+    console.log("New BlockOn : " + this.hash);
   }
 }
 
 class BlockChain {
   constructor() {
     this.chain = [this.createGenesisBlock()];
+    this.dificult = 3;
   }
 
   createGenesisBlock() {
@@ -28,7 +40,7 @@ class BlockChain {
 
   addBlock(newBlock) {
     newBlock.previousHash = this.getLastBlock().hash;
-    newBlock.hash = newBlock.calculateHash();
+    newBlock.findBlock(this.dificult);
     this.chain.push(newBlock);
   }
 
@@ -49,10 +61,15 @@ class BlockChain {
 }
 
 let ervitium = new BlockChain();
+console.log("Mining block");
 ervitium.addBlock(new Block(new Date(), { quantity: 10 }));
+console.log("Mining block");
 ervitium.addBlock(new Block(new Date(), { quantity: 2 }));
+console.log("Mining block");
 ervitium.addBlock(new Block(new Date(), { quantity: 1 }));
+console.log("Mining block");
 ervitium.addBlock(new Block(new Date(), { quantity: 1 }));
+console.log("Finished...");
 
 console.log(JSON.stringify(ervitium, null, 4));
 console.log(ervitium.validateChain());
